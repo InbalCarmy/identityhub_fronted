@@ -1,10 +1,13 @@
 import {  useState } from "react"
 import { Link } from "react-router-dom"
 import { login } from "../store/user/user.actions"
+import { useNavigate } from "react-router-dom"
+
 
 
 export function LoginPage(){
     const [credentials, setCredentials] = useState({email: '' ,password: ''})
+    const navigate = useNavigate()
 
 
     async function onLogin(ev = null) {
@@ -13,6 +16,7 @@ export function LoginPage(){
 
         try {
             await login(credentials)
+            navigate("/jira")
         } catch (err) {
             console.error('Login failed:', err)
         }
