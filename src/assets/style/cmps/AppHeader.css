@@ -11,7 +11,7 @@
 }
 
 .app-header h1{ 
-    color: var(--text-secondary);
+    color: var(--text-logo);
     font-size: 1.7rem;
     margin-left:20px ; 
 }

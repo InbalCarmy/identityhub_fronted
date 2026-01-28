@@ -1,21 +1,22 @@
 :root {
 
-    --bg-main: #0B0F19;
+    --bg-main: #0F172A;
+    --text-logo: #E5E7EB;
+    --bg-header: #020617;
+    --btn-primary: #2563EB;
+    --btn-hover: #1D4ED8;
+    --btn-active: #1E40AF;
 
-    --bg-card: #131A2A;
+    --success: #16A34A;
+    --danger: #DC2626;
 
-    --bg-header: #0F1525;
+    --bg-card: #111827;
 
-    --text-primary: #E6E8EE;
-    --text-secondary: #9AA4BF;
+    --text-primary: #E5E7EB;
+    --text-secondary: #9CA3AF;
 
-    --btn-primary: #4F8CFF;
-    --btn-hover: #2560cd;
 
-    --success: #22C55E;
-    --danger: #EF4444;
-
-    --accent: #FACC15;
+    --accent: #F59E0B;
 
 --info: #8B5CF6;
 
