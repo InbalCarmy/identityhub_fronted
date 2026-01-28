@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { jiraService } from '../services/jira.service'
 import { showErrorMsg, showSuccessMsg } from '../services/event-bus.service'
+import '../assets/style/pages/JiraConnectionPage.css'
 
 export function JiraConnectionPage() {
     const [isConnected, setIsConnected] = useState(false)
@@ -9,6 +10,25 @@ export function JiraConnectionPage() {
 
     useEffect(() => {
         checkConnectionStatus()
+
+        // Listen for messages from OAuth popup
+        const handleMessage = (event) => {
+            // Verify origin for security
+            if (event.origin !== window.location.origin) return
+
+            if (event.data.type === 'JIRA_OAUTH_SUCCESS') {
+                showSuccessMsg('Jira connected successfully!')
+                checkConnectionStatus()
+            } else if (event.data.type === 'JIRA_OAUTH_ERROR') {
+                showErrorMsg(event.data.error || 'Failed to connect to Jira')
+            }
+        }
+
+        window.addEventListener('message', handleMessage)
+
+        return () => {
+            window.removeEventListener('message', handleMessage)
+        }
     }, [])
 
     async function checkConnectionStatus() {
@@ -30,8 +50,26 @@ export function JiraConnectionPage() {
             // Get authorization URL from backend
             const { authUrl } = await jiraService.initiateOAuth()
 
-            // Redirect to Jira for authorization
-            window.location.href = authUrl
+            // Open Jira authorization in a popup window
+            const width = 600
+            const height = 700
+            const left = window.screen.width / 2 - width / 2
+            const top = window.screen.height / 2 - height / 2
+
+            const popup = window.open(
+                authUrl,
+                'Jira OAuth',
+                `width=${width},height=${height},left=${left},top=${top},popup=1,resizable=1`
+            )
+
+            // Listen for the OAuth callback
+            const checkPopupClosed = setInterval(() => {
+                if (popup.closed) {
+                    clearInterval(checkPopupClosed)
+                    // Refresh connection status after popup closes
+                    checkConnectionStatus()
+                }
+            }, 500)
         } catch (err) {
             console.error('Failed to initiate OAuth:', err)
             showErrorMsg(err.message || 'Failed to connect to Jira')
@@ -70,7 +108,7 @@ export function JiraConnectionPage() {
                     <ul>
                         <li>Create NHI finding tickets directly from IdentityHub</li>
                         <li>View recent tickets from your projects</li>
-                        <li>Automatically populate issue fields based on findings</li>
+                        {/* <li>Automatically populate issue fields based on findings</li> */}
                     </ul>
                     <button onClick={handleConnect} className="connect-btn">
                         Connect to Jira
@@ -78,7 +116,7 @@ export function JiraConnectionPage() {
                     <div className="oauth-info">
                         <small>
                             You'll be redirected to Atlassian to authorize this application.
-                            We only request permission to read and write Jira issues.
+                            <br />We only request permission to read and write Jira issues.
                         </small>
                     </div>
                 </div>
