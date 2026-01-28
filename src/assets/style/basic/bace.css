@@ -1,0 +1,22 @@
+
+
+body{
+      
+    font-family:'Courier New', Courier, monospace;
+    font-optical-sizing: auto;    
+    font-style: normal;
+    font-weight: 200;
+    margin: 0;
+    background-color: var(--bg-main);
+    /* background-color: #0B0F19; */
+    color: white;
+    
+}
+
+*{
+    box-sizing: border-box;
+}
+
+a{
+    text-decoration: none;
+}
