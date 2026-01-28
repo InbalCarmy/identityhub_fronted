@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { jiraService } from '../services/jira.service'
 import { showErrorMsg, showSuccessMsg } from '../services/event-bus.service'
 import '../assets/style/pages/JiraConnectionPage.css'
 
 export function JiraConnectionPage() {
+    const navigate = useNavigate()
     const [isConnected, setIsConnected] = useState(false)
     const [connectedAt, setConnectedAt] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -139,9 +141,12 @@ export function JiraConnectionPage() {
                         <h3>Next Steps:</h3>
                         <p>Your Jira workspace is connected! You can now:</p>
                         <ul>
-                            <li>Go to Dashboard to create NHI finding tickets</li>
+                            <li>Create NHI finding tickets directly from IdentityHub</li>
                             <li>View recent tickets from your projects</li>
                         </ul>
+                        <button onClick={() => navigate('/jira/create-ticket')} className="create-ticket-btn">
+                            Create Ticket
+                        </button>
                     </div>
                 </div>
             )}
