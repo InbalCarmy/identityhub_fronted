@@ -45,7 +45,7 @@ export async function login(credantials){
         showSuccessMsg('Login successfully!')
         return user
     } catch (err){
-        showErrorMsg('Can not login')
+        showErrorMsg(err.message || 'Can not login')
         console.log('Cannot login', err);
         throw err
     }
@@ -58,10 +58,10 @@ export async function signup(credentials) {
             type: SET_USER,
             user
         })
-        showSuccessMsg('Signup seccessfully!')
+        showSuccessMsg('Signup successfully!')
         return user
     } catch (err) {
-        showErrorMsg('Can not signup')
+        showErrorMsg(err.message || 'Can not signup')
         console.log('Cannot signup', err)
         throw err
     }

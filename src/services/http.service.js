@@ -36,6 +36,8 @@ async function ajax(endpoint, method = 'GET', data = null) {
         if (err.response && err.response.status === 401) {
             sessionStorage.clear()
         }
-        throw err
+        // Extract the error message from backend response
+        const errorMessage = err.response?.data?.err || err.message || 'Something went wrong'
+        throw new Error(errorMessage)
     }
 }
