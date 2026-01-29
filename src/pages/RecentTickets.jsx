@@ -9,6 +9,7 @@ export function RecentTickets() {
     const [tickets, setTickets] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [isConnected, setIsConnected] = useState(false)
+    const [jiraSiteUrl, setJiraSiteUrl] = useState('')
 
     useEffect(() => {
         loadTickets()
@@ -24,6 +25,11 @@ export function RecentTickets() {
 
             if (!status.isConnected) {
                 return
+            }
+
+            // Store the Jira site URL
+            if (status.siteUrl) {
+                setJiraSiteUrl(status.siteUrl)
             }
 
             // Fetch tickets created from IdentityHub
@@ -47,6 +53,12 @@ export function RecentTickets() {
             hour: '2-digit',
             minute: '2-digit'
         })
+    }
+
+    function handleTicketClick(ticket) {
+        if (jiraSiteUrl) {
+            window.open(`${jiraSiteUrl}/browse/${ticket.key}`, '_blank')
+        }
     }
 
     if (isLoading) {
@@ -91,7 +103,11 @@ export function RecentTickets() {
             ) : (
                 <div className="tickets-list">
                     {tickets.map(ticket => (
-                        <div key={ticket.id} className="ticket-card">
+                        <div
+                            key={ticket.id}
+                            className="ticket-card"
+                            onClick={() => handleTicketClick(ticket)}
+                        >
                             <div className="ticket-header">
                                 <span className="ticket-key">{ticket.key}</span>
                                 <span className={`ticket-status status-${ticket.fields.status.name.toLowerCase().replace(/\s+/g, '-')}`}>
