@@ -71,6 +71,9 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
                 }
             }
 
+            // Add IdentityHub label to track tickets created from this platform
+            issueData.labels = ['created-from-identityhub']
+
             console.log('Creating issue with data:', issueData)
 
             // Create the issue

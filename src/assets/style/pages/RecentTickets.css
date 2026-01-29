@@ -1,0 +1,141 @@
+.recent-tickets-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.recent-tickets-page h2 {
+    margin-bottom: 2rem;
+}
+
+.loading,
+.not-connected,
+.no-tickets {
+    padding: 2rem;
+    text-align: center;
+    background-color: var(--bg-card, #f5f5f5);
+    border-radius: 1rem;
+    border: 2px solid var(--border, #e0e0e0);
+}
+
+.not-connected p,
+.no-tickets p {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary, #666);
+}
+
+.tickets-list {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    /* justify-items: center; */
+}
+
+.ticket-card {
+    background-color: var(--bg-card, #fff);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 2px solid var(--border, #e0e0e0);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.ticket-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.ticket-key {
+    font-weight: 600;
+    color: var(--primary, #007bff);
+    font-size: 0.9rem;
+}
+
+.ticket-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-to-do,
+.status-open {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.status-in-progress {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+.status-done,
+.status-closed {
+    background-color: #e8f5e9;
+    color: #388e3c;
+}
+
+.ticket-summary {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--text-primary, #333);
+    line-height: 1.4;
+}
+
+.ticket-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary, #666);
+}
+
+.ticket-project {
+    font-weight: 500;
+}
+
+.ticket-date {
+    color: var(--text-tertiary, #999);
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+
+
+/* Responsive */
+@media (max-width: 768px) {
+    .recent-tickets-page {
+        padding: 1rem;
+    }
+
+    .tickets-list {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .actions button {
+        width: 100%;
+    }
+}

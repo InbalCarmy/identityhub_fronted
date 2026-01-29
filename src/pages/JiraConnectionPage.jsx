@@ -144,9 +144,14 @@ export function JiraConnectionPage() {
                             <li>Create NHI finding tickets directly from IdentityHub</li>
                             <li>View recent tickets from your projects</li>
                         </ul>
-                        <button onClick={() => navigate('/jira/create-ticket')} className="create-ticket-btn">
-                            Create Ticket
-                        </button>
+                        <div className="action-buttons">
+                            <button onClick={() => navigate('/jira/create-ticket')} className="create-ticket-btn">
+                                Create Ticket
+                            </button>
+                            <button onClick={() => navigate('/jira/recent-tickets')} className="recent-tickets-btn">
+                                View Recent Tickets
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
