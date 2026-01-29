@@ -6,17 +6,11 @@ import '../assets/style/pages/CreateTicketPage.css'
 
 export function CreateTickedPage() {
     const navigate = useNavigate()
-
-    // State for projects
     const [projects, setProjects] = useState([])
     const [selectedProject, setSelectedProject] = useState(null)
     const [isLoadingProjects, setIsLoadingProjects] = useState(true)
-
-    // State for project metadata
     const [projectMetadata, setProjectMetadata] = useState(null)
     const [isLoadingMetadata, setIsLoadingMetadata] = useState(false)
-
-    // State for form
     const [formData, setFormData] = useState({
         summary: '',
         description: '',
@@ -24,7 +18,6 @@ export function CreateTickedPage() {
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Check if Jira is connected and load projects
     useEffect(() => {
         loadProjects()
     }, [])
@@ -32,8 +25,6 @@ export function CreateTickedPage() {
     async function loadProjects() {
         try {
             setIsLoadingProjects(true)
-
-            // First check if Jira is connected
             const status = await jiraService.getConnectionStatus()
 
             if (!status.isConnected) {
@@ -73,13 +64,29 @@ export function CreateTickedPage() {
         try {
             setIsLoadingMetadata(true)
             const metadata = await jiraService.getProjectMetadata(projectKey)
-            setProjectMetadata(metadata)
+
+            console.log('Raw metadata:', metadata)
+
+            // Parse the metadata structure from Jira API
+            const projectData = metadata.projects?.[0]
+
+            if (!projectData) {
+                throw new Error('No project data found')
+            }
+
+            const parsedMetadata = {
+                issueTypes: projectData.issuetypes || [],
+                priorities: projectData.issuetypes?.[0]?.fields?.priority?.allowedValues || []
+            }
+
+            console.log('Parsed metadata:', parsedMetadata)
+            setProjectMetadata(parsedMetadata)
 
             // Reset form when changing projects
             setFormData({
                 summary: '',
                 description: '',
-                priority: metadata.priorities?.[0]?.id || ''
+                priority: parsedMetadata.priorities?.[0]?.id || ''
             })
         } catch (err) {
             console.error('Failed to load project metadata:', err)
@@ -119,18 +126,51 @@ export function CreateTickedPage() {
         try {
             setIsSubmitting(true)
 
-            // Prepare issue data
+            // Get the first available issue type
+            const issueTypeId = projectMetadata?.issueTypes?.[0]?.id
+
+            if (!issueTypeId) {
+                showErrorMsg('No issue type available for this project')
+                return
+            }
+
+            console.log('Using issue type ID:', issueTypeId)
+            console.log('Available issue types:', projectMetadata?.issueTypes)
+
+            // Prepare issue data in Jira API format
             const issueData = {
-                project: selectedProject.key,
+                project: {
+                    key: selectedProject.key
+                },
                 summary: formData.summary,
-                description: formData.description,
-                issuetype: projectMetadata?.issueTypes?.[0]?.id || '10001',
+                description: {
+                    type: 'doc',
+                    version: 1,
+                    content: [
+                        {
+                            type: 'paragraph',
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: formData.description
+                                }
+                            ]
+                        }
+                    ]
+                },
+                issuetype: {
+                    id: issueTypeId
+                }
             }
 
             // Add priority if selected
             if (formData.priority) {
-                issueData.priority = formData.priority
+                issueData.priority = {
+                    id: formData.priority
+                }
             }
+
+            console.log('Creating issue with data:', issueData)
 
             // Create the issue
             const createdIssue = await jiraService.createIssue(issueData)
@@ -160,6 +200,10 @@ export function CreateTickedPage() {
             </section>
         )
     }
+
+    
+    
+    
 
     return (
         <section className="create-ticket-page">
@@ -202,7 +246,6 @@ export function CreateTickedPage() {
                     {/* Form fields - only show when project is selected and metadata loaded */}
                     {selectedProject && projectMetadata && !isLoadingMetadata && (
                         <>
-                            {/* Summary */}
                             <div className="form-group">
                                 <label htmlFor="summary">
                                     Summary (Title) <span className="required">*</span>
@@ -218,7 +261,6 @@ export function CreateTickedPage() {
                                 />
                             </div>
 
-                            {/* Description */}
                             <div className="form-group">
                                 <label htmlFor="description">
                                     Description <span className="required">*</span>
@@ -234,7 +276,6 @@ export function CreateTickedPage() {
                                 />
                             </div>
 
-                            {/* Priority - only show if project has priorities */}
                             {projectMetadata.priorities && projectMetadata.priorities.length > 0 && (
                                 <div className="form-group">
                                     <label htmlFor="priority">Priority</label>
@@ -254,7 +295,6 @@ export function CreateTickedPage() {
                                 </div>
                             )}
 
-                            {/* Submit Button */}
                             <div className="form-actions">
                                 <button
                                     type="submit"
