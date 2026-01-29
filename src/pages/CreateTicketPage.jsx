@@ -11,6 +11,7 @@ export function CreateTickedPage() {
     const [isLoadingProjects, setIsLoadingProjects] = useState(true)
     const [projectMetadata, setProjectMetadata] = useState(null)
     const [isLoadingMetadata, setIsLoadingMetadata] = useState(false)
+    const [selectedIssueType, setSelectedIssueType] = useState(null)
     const [formData, setFormData] = useState({
         summary: '',
         description: '',
@@ -82,11 +83,12 @@ export function CreateTickedPage() {
             console.log('Parsed metadata:', parsedMetadata)
             setProjectMetadata(parsedMetadata)
 
-            // Reset form when changing projects
+            // Reset issue type and form when changing projects
+            setSelectedIssueType(null)
             setFormData({
                 summary: '',
                 description: '',
-                priority: parsedMetadata.priorities?.[0]?.id || ''
+                priority: ''
             })
         } catch (err) {
             console.error('Failed to load project metadata:', err)
@@ -94,6 +96,31 @@ export function CreateTickedPage() {
         } finally {
             setIsLoadingMetadata(false)
         }
+    }
+
+    function handleIssueTypeChange(e) {
+        const issueTypeId = e.target.value
+
+        if (!issueTypeId) {
+            setSelectedIssueType(null)
+            setFormData({
+                summary: '',
+                description: '',
+                priority: ''
+            })
+            return
+        }
+
+        const issueType = projectMetadata.issueTypes.find(it => it.id === issueTypeId)
+        setSelectedIssueType(issueType)
+
+        // Get the default priority for this issue type
+        const priorities = issueType?.fields?.priority?.allowedValues || []
+        setFormData({
+            summary: '',
+            description: '',
+            priority: priorities?.[0]?.id || ''
+        })
     }
 
     function handleInputChange(e) {
@@ -112,6 +139,11 @@ export function CreateTickedPage() {
             return
         }
 
+        if (!selectedIssueType) {
+            showErrorMsg('Please select an issue type')
+            return
+        }
+
         // Validation
         if (!formData.summary.trim()) {
             showErrorMsg('Summary is required')
@@ -126,16 +158,16 @@ export function CreateTickedPage() {
         try {
             setIsSubmitting(true)
 
-            // Get the first available issue type
-            const issueTypeId = projectMetadata?.issueTypes?.[0]?.id
+            // Use the selected issue type
+            const issueTypeId = selectedIssueType?.id
 
             if (!issueTypeId) {
-                showErrorMsg('No issue type available for this project')
+                showErrorMsg('Please select an issue type')
                 return
             }
 
             console.log('Using issue type ID:', issueTypeId)
-            console.log('Available issue types:', projectMetadata?.issueTypes)
+            console.log('Selected issue type:', selectedIssueType)
 
             // Prepare issue data in Jira API format
             const issueData = {
@@ -177,11 +209,12 @@ export function CreateTickedPage() {
 
             showSuccessMsg(`Ticket ${createdIssue.key} created successfully!`)
 
-            // Reset form
+            // Reset form (keep issue type selected)
+            const priorities = selectedIssueType?.fields?.priority?.allowedValues || []
             setFormData({
                 summary: '',
                 description: '',
-                priority: projectMetadata?.priorities?.[0]?.id || ''
+                priority: priorities?.[0]?.id || ''
             })
 
         } catch (err) {
@@ -243,12 +276,39 @@ export function CreateTickedPage() {
                         <div className="loading">Loading project configuration...</div>
                     )}
 
-                    {/* Form fields - only show when project is selected and metadata loaded */}
+                    {/* Issue Type Selection - show after project is selected and metadata loaded */}
                     {selectedProject && projectMetadata && !isLoadingMetadata && (
+                        <div className="form-group">
+                            <label htmlFor="issueType">
+                                Issue Type <span className="required">*</span>
+                            </label>
+                            <select
+                                id="issueType"
+                                value={selectedIssueType?.id || ''}
+                                onChange={handleIssueTypeChange}
+                                required
+                            >
+                                <option value="">Select an issue type...</option>
+                                {projectMetadata.issueTypes.map(issueType => (
+                                    <option key={issueType.id} value={issueType.id}>
+                                        {issueType.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {/* Form fields - only show when issue type is selected */}
+                    {selectedProject && projectMetadata && !isLoadingMetadata && selectedIssueType && (
                         <>
+                            <div className="form-separator"></div>
+
                             <div className="form-group">
                                 <label htmlFor="summary">
-                                    Summary (Title) <span className="required">*</span>
+                                    Summary (Title)
+                                    {selectedIssueType.fields?.summary?.required !== false && (
+                                        <span className="required">*</span>
+                                    )}
                                 </label>
                                 <input
                                     type="text"
@@ -257,13 +317,16 @@ export function CreateTickedPage() {
                                     value={formData.summary}
                                     onChange={handleInputChange}
                                     placeholder="e.g., Stale Service Account: svc-deploy-prod"
-                                    required
+                                    required={selectedIssueType.fields?.summary?.required !== false}
                                 />
                             </div>
 
                             <div className="form-group">
                                 <label htmlFor="description">
-                                    Description <span className="required">*</span>
+                                    Description
+                                    {selectedIssueType.fields?.description?.required !== false && (
+                                        <span className="required">*</span>
+                                    )}
                                 </label>
                                 <textarea
                                     id="description"
@@ -272,21 +335,30 @@ export function CreateTickedPage() {
                                     onChange={handleInputChange}
                                     placeholder="Provide details about the NHI finding..."
                                     rows="8"
-                                    required
+                                    required={selectedIssueType.fields?.description?.required !== false}
                                 />
                             </div>
 
-                            {projectMetadata.priorities && projectMetadata.priorities.length > 0 && (
+                            {selectedIssueType?.fields?.priority?.allowedValues &&
+                             selectedIssueType.fields.priority.allowedValues.length > 0 && (
                                 <div className="form-group">
-                                    <label htmlFor="priority">Priority</label>
+                                    <label htmlFor="priority">
+                                        Priority
+                                        {selectedIssueType.fields.priority.required &&
+                                            <span className="required">*</span>
+                                        }
+                                    </label>
                                     <select
                                         id="priority"
                                         name="priority"
                                         value={formData.priority}
                                         onChange={handleInputChange}
+                                        required={selectedIssueType.fields.priority.required}
                                     >
-                                        <option value="">None</option>
-                                        {projectMetadata.priorities.map(priority => (
+                                        {!selectedIssueType.fields.priority.required && (
+                                            <option value="">None</option>
+                                        )}
+                                        {selectedIssueType.fields.priority.allowedValues.map(priority => (
                                             <option key={priority.id} value={priority.id}>
                                                 {priority.name}
                                             </option>
