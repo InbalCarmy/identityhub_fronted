@@ -21,7 +21,6 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
     async function handleSubmit(e) {
         e.preventDefault()
 
-        // Validation
         if (!formData.summary.trim()) {
             showErrorMsg('Summary is required')
             return
