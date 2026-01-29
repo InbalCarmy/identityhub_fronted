@@ -79,7 +79,7 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
             // Create the issue
             const createdIssue = await jiraService.createIssue(issueData)
 
-            showSuccessMsg(`Ticket ${createdIssue.key} created successfully!`)
+            showSuccessMsg(`Ticket ${createdIssue.key} created successfully! Redirecting...`)
 
             // Reset form
             const priorities = selectedIssueType?.fields?.priority?.allowedValues || []
@@ -89,8 +89,9 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
                 priority: priorities?.[0]?.id || ''
             })
 
-            // Call success callback
+            // Wait for Jira to index the ticket before redirecting
             if (onSuccess) {
+                await new Promise(resolve => setTimeout(resolve, 3000))
                 onSuccess(createdIssue)
             }
 
