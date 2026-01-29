@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { jiraService } from '../services/jira.service'
-import { showErrorMsg, showSuccessMsg } from '../services/event-bus.service'
+import { showErrorMsg } from '../services/event-bus.service'
+import { TicketForm } from '../cmps/TicketForm'
 import '../assets/style/pages/CreateTicketPage.css'
 
 export function CreateTickedPage() {
@@ -12,12 +13,6 @@ export function CreateTickedPage() {
     const [projectMetadata, setProjectMetadata] = useState(null)
     const [isLoadingMetadata, setIsLoadingMetadata] = useState(false)
     const [selectedIssueType, setSelectedIssueType] = useState(null)
-    const [formData, setFormData] = useState({
-        summary: '',
-        description: '',
-        priority: ''
-    })
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
     useEffect(() => {
         loadProjects()
@@ -83,13 +78,8 @@ export function CreateTickedPage() {
             console.log('Parsed metadata:', parsedMetadata)
             setProjectMetadata(parsedMetadata)
 
-            // Reset issue type and form when changing projects
+            // Reset issue type when changing projects
             setSelectedIssueType(null)
-            setFormData({
-                summary: '',
-                description: '',
-                priority: ''
-            })
         } catch (err) {
             console.error('Failed to load project metadata:', err)
             showErrorMsg('Failed to load project configuration')
@@ -103,126 +93,11 @@ export function CreateTickedPage() {
 
         if (!issueTypeId) {
             setSelectedIssueType(null)
-            setFormData({
-                summary: '',
-                description: '',
-                priority: ''
-            })
             return
         }
 
         const issueType = projectMetadata.issueTypes.find(it => it.id === issueTypeId)
         setSelectedIssueType(issueType)
-
-        // Get the default priority for this issue type
-        const priorities = issueType?.fields?.priority?.allowedValues || []
-        setFormData({
-            summary: '',
-            description: '',
-            priority: priorities?.[0]?.id || ''
-        })
-    }
-
-    function handleInputChange(e) {
-        const { name, value } = e.target
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }))
-    }
-
-    async function handleSubmit(e) {
-        e.preventDefault()
-
-        if (!selectedProject) {
-            showErrorMsg('Please select a project')
-            return
-        }
-
-        if (!selectedIssueType) {
-            showErrorMsg('Please select an issue type')
-            return
-        }
-
-        // Validation
-        if (!formData.summary.trim()) {
-            showErrorMsg('Summary is required')
-            return
-        }
-
-        if (!formData.description.trim()) {
-            showErrorMsg('Description is required')
-            return
-        }
-
-        try {
-            setIsSubmitting(true)
-
-            // Use the selected issue type
-            const issueTypeId = selectedIssueType?.id
-
-            if (!issueTypeId) {
-                showErrorMsg('Please select an issue type')
-                return
-            }
-
-            console.log('Using issue type ID:', issueTypeId)
-            console.log('Selected issue type:', selectedIssueType)
-
-            // Prepare issue data in Jira API format
-            const issueData = {
-                project: {
-                    key: selectedProject.key
-                },
-                summary: formData.summary,
-                description: {
-                    type: 'doc',
-                    version: 1,
-                    content: [
-                        {
-                            type: 'paragraph',
-                            content: [
-                                {
-                                    type: 'text',
-                                    text: formData.description
-                                }
-                            ]
-                        }
-                    ]
-                },
-                issuetype: {
-                    id: issueTypeId
-                }
-            }
-
-            // Add priority if selected
-            if (formData.priority) {
-                issueData.priority = {
-                    id: formData.priority
-                }
-            }
-
-            console.log('Creating issue with data:', issueData)
-
-            // Create the issue
-            const createdIssue = await jiraService.createIssue(issueData)
-
-            showSuccessMsg(`Ticket ${createdIssue.key} created successfully!`)
-
-            // Reset form (keep issue type selected)
-            const priorities = selectedIssueType?.fields?.priority?.allowedValues || []
-            setFormData({
-                summary: '',
-                description: '',
-                priority: priorities?.[0]?.id || ''
-            })
-
-        } catch (err) {
-            console.error('Failed to create ticket:', err)
-            showErrorMsg(err.message || 'Failed to create ticket')
-        } finally {
-            setIsSubmitting(false)
-        }
     }
 
     if (isLoadingProjects) {
@@ -236,8 +111,6 @@ export function CreateTickedPage() {
 
     
     
-    
-
     return (
         <section className="create-ticket-page">
             <h2>Create NHI Finding Ticket</h2>
@@ -250,8 +123,7 @@ export function CreateTickedPage() {
                     </button>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="ticket-form">
-                    {/* Project Selection */}
+                <div className="ticket-form">
                     <div className="form-group">
                         <label htmlFor="project">
                             Project <span className="required">*</span>
@@ -300,93 +172,16 @@ export function CreateTickedPage() {
 
                     {/* Form fields - only show when issue type is selected */}
                     {selectedProject && projectMetadata && !isLoadingMetadata && selectedIssueType && (
-                        <>
-                            <div className="form-separator"></div>
-
-                            <div className="form-group">
-                                <label htmlFor="summary">
-                                    Summary (Title)
-                                    {selectedIssueType.fields?.summary?.required !== false && (
-                                        <span className="required">*</span>
-                                    )}
-                                </label>
-                                <input
-                                    type="text"
-                                    id="summary"
-                                    name="summary"
-                                    value={formData.summary}
-                                    onChange={handleInputChange}
-                                    placeholder="e.g., Stale Service Account: svc-deploy-prod"
-                                    required={selectedIssueType.fields?.summary?.required !== false}
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="description">
-                                    Description
-                                    {selectedIssueType.fields?.description?.required !== false && (
-                                        <span className="required">*</span>
-                                    )}
-                                </label>
-                                <textarea
-                                    id="description"
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleInputChange}
-                                    placeholder="Provide details about the NHI finding..."
-                                    rows="8"
-                                    required={selectedIssueType.fields?.description?.required !== false}
-                                />
-                            </div>
-
-                            {selectedIssueType?.fields?.priority?.allowedValues &&
-                             selectedIssueType.fields.priority.allowedValues.length > 0 && (
-                                <div className="form-group">
-                                    <label htmlFor="priority">
-                                        Priority
-                                        {selectedIssueType.fields.priority.required &&
-                                            <span className="required">*</span>
-                                        }
-                                    </label>
-                                    <select
-                                        id="priority"
-                                        name="priority"
-                                        value={formData.priority}
-                                        onChange={handleInputChange}
-                                        required={selectedIssueType.fields.priority.required}
-                                    >
-                                        {!selectedIssueType.fields.priority.required && (
-                                            <option value="">None</option>
-                                        )}
-                                        {selectedIssueType.fields.priority.allowedValues.map(priority => (
-                                            <option key={priority.id} value={priority.id}>
-                                                {priority.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-
-                            <div className="form-actions">
-                                <button
-                                    type="submit"
-                                    className="btn-primary"
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? 'Creating Ticket...' : 'Create Ticket'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/jira')}
-                                    className="btn-secondary"
-                                    disabled={isSubmitting}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </>
+                        <TicketForm
+                            selectedProject={selectedProject}
+                            selectedIssueType={selectedIssueType}
+                            onCancel={() => navigate('/jira')}
+                            onSuccess={() => {
+                                // Optional: Could navigate somewhere or just stay on the page
+                            }}
+                        />
                     )}
-                </form>
+                </div>
             )}
         </section>
     )
