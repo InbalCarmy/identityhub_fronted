@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { showErrorMsg, showSuccessMsg } from '../services/event-bus.service'
 import { jiraService } from '../services/jira.service'
 
@@ -9,6 +9,48 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
         priority: selectedIssueType?.fields?.priority?.allowedValues?.[0]?.id || ''
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [additionalFields, setAdditionalFields] = useState([])
+
+    // Extract additional required fields when issue type changes
+    useEffect(() => {
+        if (!selectedIssueType?.fields) return
+
+        const fieldsToIgnore = ['summary', 'description', 'priority', 'project', 'issuetype', 'labels']
+        const fields = []
+        
+
+        Object.entries(selectedIssueType.fields).forEach(([fieldKey, fieldConfig]) => {
+            // Only include required fields that we don't already handle
+            if (fieldConfig.required && !fieldsToIgnore.includes(fieldKey)) {
+                fields.push({
+                    key: fieldKey,
+                    name: fieldConfig.name,
+                    schema: fieldConfig.schema,
+                    allowedValues: fieldConfig.allowedValues,
+                    required: fieldConfig.required
+                })
+
+                // Initialize form data for this field
+                if (fieldConfig.allowedValues && fieldConfig.allowedValues.length > 0) {
+                    setFormData(prev => ({
+                        ...prev,
+                        [fieldKey]: fieldConfig.allowedValues[0].id
+                    }))
+                } else {
+                    setFormData(prev => ({
+                        ...prev,
+                        [fieldKey]: ''
+                    }))
+                }
+            }
+        })
+
+        setAdditionalFields(fields)
+    }, [selectedIssueType])
+
+
+    console.log("set data:", formData);
+    
 
     function handleInputChange(e) {
         const { name, value } = e.target
@@ -29,6 +71,14 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
         if (!formData.description.trim()) {
             showErrorMsg('Description is required')
             return
+        }
+
+        // Validate additional required fields
+        for (const field of additionalFields) {
+            if (field.required && !formData[field.key]) {
+                showErrorMsg(`${field.name} is required`)
+                return
+            }
         }
 
         try {
@@ -72,6 +122,22 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
 
             // Add IdentityHub label to track tickets created from this platform
             issueData.labels = ['created-from-identityhub']
+
+            // Add additional required fields
+            additionalFields.forEach(field => {
+                if (formData[field.key]) {
+                    if (field.allowedValues && field.allowedValues.length > 0) {
+                        // If it's a select field, use the id
+                        issueData[field.key] = { id: formData[field.key] }
+                    } else if (field.schema?.type === 'array') {
+                        // If it's an array field
+                        issueData[field.key] = [formData[field.key]]
+                    } else {
+                        // Otherwise, use the value directly
+                        issueData[field.key] = formData[field.key]
+                    }
+                }
+            })
 
             console.log('Creating issue with data:', issueData)
 
@@ -169,6 +235,51 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
                     </select>
                 </div>
             )}
+
+            {/* Render additional required fields dynamically */}
+            {additionalFields.map(field => (
+                <div key={field.key} className="form-group">
+                    <label htmlFor={field.key}>
+                        {field.name}
+                        {field.required && <span className="required">*</span>}
+                    </label>
+
+                    {field.allowedValues && field.allowedValues.length > 0 ? (
+                        <select
+                            id={field.key}
+                            name={field.key}
+                            value={formData[field.key] || ''}
+                            onChange={handleInputChange}
+                            required={field.required}
+                        >
+                            {!field.required && <option value="">None</option>}
+                            {field.allowedValues.map(value => (
+                                <option key={value.id} value={value.id}>
+                                    {value.name || value.value}
+                                </option>
+                            ))}
+                        </select>
+                    ) : field.schema?.type === 'string' && field.schema?.system === 'text' ? (
+                        <textarea
+                            id={field.key}
+                            name={field.key}
+                            value={formData[field.key] || ''}
+                            onChange={handleInputChange}
+                            required={field.required}
+                            rows="4"
+                        />
+                    ) : (
+                        <input
+                            type="text"
+                            id={field.key}
+                            name={field.key}
+                            value={formData[field.key] || ''}
+                            onChange={handleInputChange}
+                            required={field.required}
+                        />
+                    )}
+                </div>
+            ))}
 
             <div className="form-actions">
                 <button
