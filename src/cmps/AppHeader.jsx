@@ -28,11 +28,17 @@ export function AppHeader(){
     return(
         <header className="app-header">
             <h1>IdentityHub</h1>
-            {user &&
-                <button onClick={onLogout}>
-                    Logout
-                </button>     
-            }
+            {user && (
+                <nav className="header-nav">
+                    <Link to="/jira">Jira</Link>
+                    <Link to="/jira/create-ticket">Create Ticket</Link>
+                    <Link to="/jira/recent-tickets">Recent Tickets</Link>
+                    <Link to="/api-keys">API Keys</Link>
+                    <button onClick={onLogout}>
+                        Logout
+                    </button>
+                </nav>
+            )}
         </header>
     )
 }

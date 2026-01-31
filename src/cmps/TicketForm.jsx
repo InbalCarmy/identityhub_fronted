@@ -33,18 +33,10 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
             const type = schema.type?.toLowerCase()
             const items = schema.items?.toLowerCase()
 
-            // String/text fields
             if (type === 'string') return true
-
-            // Number fields
             if (type === 'number') return true
-
-            // Date fields
             if (type === 'date' || type === 'datetime') return true
-
-            // Array fields (for labels/chips)
             if (type === 'array' && items === 'string') return true
-
             return false
         }
 
@@ -87,9 +79,6 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
 
         setAdditionalFields(fields)
     }, [selectedIssueType])
-
-
-    console.log("set data:", formData);
     
 
     function handleInputChange(e) {

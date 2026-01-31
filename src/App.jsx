@@ -8,6 +8,7 @@ import { JiraConnectionPage } from './pages/JiraConnectionPage'
 import { JiraOAuthSuccess, JiraOAuthError } from './pages/JiraOAuthCallback'
 import { CreateTickedPage } from './pages/CreateTicketPage'
 import { RecentTickets } from './pages/RecentTickets'
+import { ApiKeysPage } from './pages/ApiKeysPage'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path ="/jira/error" element ={<JiraOAuthError/>}/>
         <Route path ="/jira/create-ticket" element ={<CreateTickedPage/>}/>
         <Route path ="/jira/recent-tickets" element ={<RecentTickets/>}/>
+        <Route path ="/api-keys" element ={<ApiKeysPage/>}/>
       </Routes>      
     </main>
 
