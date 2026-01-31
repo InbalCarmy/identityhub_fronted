@@ -7,7 +7,7 @@ export const jiraService = {
     getProjects,
     getProjectMetadata,
     createIssue,
-    getRecentIssues,
+    // getRecentIssues,
     getIdentityHubTickets
 }
 
@@ -41,9 +41,9 @@ async function createIssue(issueData) {
     return await httpService.post('jira/issues', issueData)
 }
 
-async function getRecentIssues(projectKey, maxResults = 10) {
-    return await httpService.get(`jira/projects/${projectKey}/issues`, { maxResults })
-}
+// async function getRecentIssues(projectKey, maxResults = 10) {
+//     return await httpService.get(`jira/projects/${projectKey}/issues`, { maxResults })
+// }
 
 async function getIdentityHubTickets(maxResults = 10) {
     return await httpService.get('jira/identityhub-tickets', { maxResults })

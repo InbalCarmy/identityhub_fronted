@@ -86,13 +86,7 @@ export function RecentTickets() {
 
     return (
         <section className="recent-tickets-page">
-            <div className="header-with-refresh">
                 <h2>Recent Tickets from IdentityHub</h2>
-                <button onClick={loadTickets} className="btn-refresh" disabled={isLoading}>
-                    {isLoading ? 'Refreshing...' : 'Refresh'}
-                </button>
-            </div>
-
             {tickets.length === 0 ? (
                 <div className="no-tickets">
                     <p>No tickets created from IdentityHub yet.</p>

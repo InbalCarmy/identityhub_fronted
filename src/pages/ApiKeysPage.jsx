@@ -96,12 +96,12 @@ export function ApiKeysPage() {
                 </p>
             </div>
 
-            {/* Generated API Key Display (shown only once) */}
+            {/* Generated API Key modal */}
             {generatedKey && (
                 <div className="api-key-modal-overlay" onClick={() => setGeneratedKey(null)}>
                     <div className="api-key-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h3>⚠️ Save This API Key Now!</h3>
+                            <h3> Save This API Key Now!</h3>
                             <button className="close-btn" onClick={() => setGeneratedKey(null)}>×</button>
                         </div>
                         <div className="modal-body">
@@ -115,7 +115,7 @@ export function ApiKeysPage() {
                                     className="copy-btn"
                                     onClick={() => copyToClipboard(generatedKey.apiKey)}
                                 >
-                                    📋 Copy
+                                     Copy
                                 </button>
                             </div>
                             <div className="key-info">
@@ -195,7 +195,7 @@ export function ApiKeysPage() {
                                                 className="delete-btn"
                                                 onClick={() => deleteApiKey(key.id, key.name)}
                                             >
-                                                🗑️ Delete
+                                                 Delete
                                             </button>
                                         </td>
                                     </tr>
@@ -208,7 +208,7 @@ export function ApiKeysPage() {
 
             {/* API Documentation Link */}
             <div className="api-documentation-section">
-                <h3>📚 API Documentation</h3>
+                <h3> API Documentation</h3>
                 <p>Learn how to use your API keys to create NHI findings programmatically.</p>
                 <div className="doc-links">
                     <div className="doc-card">
@@ -225,7 +225,7 @@ export function ApiKeysPage() {
                         <h4>API Endpoints</h4>
                         <ul>
                             <li><code>POST /api/nhi-findings</code> - Create finding</li>
-                            <li><code>GET /api/nhi-findings</code> - List findings</li>
+                            {/* <li><code>GET /api/nhi-findings</code> - List findings</li> */}
                         </ul>
                     </div>
                 </div>
