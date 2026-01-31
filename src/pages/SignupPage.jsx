@@ -1,10 +1,11 @@
 
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { signup } from "../store/user/user.actions"
 import { useState } from "react"
 
 export function SignupPage(){
-    const [credentials, setCredentials] = useState({name: '', email:'', password: '', isOnboarded: false})
+    const [credentials, setCredentials] = useState({name: '', email:'', password: ''})
+    const navigate = useNavigate()
 
     function handleChange(ev) {
         const field = ev.target.name
@@ -18,6 +19,7 @@ export function SignupPage(){
         
         try {
             await signup(credentials)
+            navigate('/jira')
         } catch (err) {
             console.error('Signup failed:', err)
         }
