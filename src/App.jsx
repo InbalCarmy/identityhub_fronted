@@ -4,6 +4,7 @@ import { AppHeader } from './cmps/AppHeader'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { UserMsg } from './cmps/UserMsg'
+import { ProtectedRoute } from './cmps/ProtectedRoute'
 import { JiraConnectionPage } from './pages/JiraConnectionPage'
 import { JiraOAuthSuccess, JiraOAuthError } from './pages/JiraOAuthCallback'
 import { CreateTickedPage } from './pages/CreateTicketPage'
@@ -17,15 +18,42 @@ function App() {
     <UserMsg />
     <main>
       <Routes>
+        {/* Public routes */}
         <Route path ="/" element ={<LoginPage/>}/>
         <Route path ="/signup" element ={<SignupPage/>}/>
-        <Route path ="/jira" element ={<JiraConnectionPage/>}/>
-        <Route path ="/jira/success" element ={<JiraOAuthSuccess/>}/>
-        <Route path ="/jira/error" element ={<JiraOAuthError/>}/>
-        <Route path ="/jira/create-ticket" element ={<CreateTickedPage/>}/>
-        <Route path ="/jira/recent-tickets" element ={<RecentTickets/>}/>
-        <Route path ="/api-keys" element ={<ApiKeysPage/>}/>
-      </Routes>      
+
+        {/* Protected routes */}
+        <Route path ="/jira" element ={
+          <ProtectedRoute>
+            <JiraConnectionPage/>
+          </ProtectedRoute>
+        }/>
+        <Route path ="/jira/success" element ={
+          <ProtectedRoute>
+            <JiraOAuthSuccess/>
+          </ProtectedRoute>
+        }/>
+        <Route path ="/jira/error" element ={
+          <ProtectedRoute>
+            <JiraOAuthError/>
+          </ProtectedRoute>
+        }/>
+        <Route path ="/jira/create-ticket" element ={
+          <ProtectedRoute>
+            <CreateTickedPage/>
+          </ProtectedRoute>
+        }/>
+        <Route path ="/jira/recent-tickets" element ={
+          <ProtectedRoute>
+            <RecentTickets/>
+          </ProtectedRoute>
+        }/>
+        <Route path ="/api-keys" element ={
+          <ProtectedRoute>
+            <ApiKeysPage/>
+          </ProtectedRoute>
+        }/>
+      </Routes>
     </main>
 
     </>

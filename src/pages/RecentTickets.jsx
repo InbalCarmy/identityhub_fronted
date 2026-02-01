@@ -13,6 +13,7 @@ export function RecentTickets() {
     const [projects, setProjects] = useState([])
     const [selectedProjectKey, setSelectedProjectKey] = useState('')
     const [isLoadingProjects, setIsLoadingProjects] = useState(false)
+    const [isPolling, setIsPolling] = useState(false)
 
     useEffect(() => {
         loadInitialData()
@@ -23,6 +24,16 @@ export function RecentTickets() {
             loadTickets()
         }
     }, [selectedProjectKey, isConnected])
+
+    // Poll for new ticket if we just created one
+    useEffect(() => {
+        const newTicketKey = location.state?.newTicketKey
+        const projectKey = location.state?.projectKey
+
+        if (newTicketKey && isConnected && !isLoading) {
+            pollForNewTicket(newTicketKey, projectKey)
+        }
+    }, [location.state, isConnected, isLoading])
 
     async function loadInitialData() {
         try {
@@ -79,6 +90,53 @@ export function RecentTickets() {
         } finally {
             setIsLoading(false)
         }
+    }
+
+    async function pollForNewTicket(ticketKey, projectKey) {
+        setIsPolling(true)
+        const maxAttempts = 10 // Poll up to 10 times
+        const pollInterval = 1000 // Check every 1 second
+        let attempts = 0
+
+        console.log(`Polling for new ticket: ${ticketKey}`)
+
+        const poll = async () => {
+            attempts++
+
+            try {
+                // Fetch latest tickets
+                const ticketsData = await jiraService.getIdentityHubTickets(
+                    10,
+                    projectKey || null
+                )
+
+                // Check if our new ticket appears in the list
+                const ticketFound = ticketsData.some(ticket => ticket.key === ticketKey)
+
+                if (ticketFound) {
+                    console.log(`✓ Ticket ${ticketKey} found after ${attempts} attempts`)
+                    setTickets(ticketsData)
+                    setIsPolling(false)
+                    return // Stop polling
+                }
+
+                // Continue polling if not found and haven't exceeded max attempts
+                if (attempts < maxAttempts) {
+                    setTimeout(poll, pollInterval)
+                } else {
+                    console.log(`Polling timeout for ticket ${ticketKey}`)
+                    setIsPolling(false)
+                    // Load tickets one final time
+                    loadTickets()
+                }
+            } catch (err) {
+                console.error('Error during polling:', err)
+                setIsPolling(false)
+            }
+        }
+
+        // Start polling after a short delay to avoid immediate check
+        setTimeout(poll, 500)
     }
 
     function formatDate(dateString) {

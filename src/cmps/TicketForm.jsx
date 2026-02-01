@@ -157,7 +157,6 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
                 }
             }
 
-            // Add priority if selected
             if (formData.priority) {
                 issueData.priority = {
                     id: formData.priority
@@ -186,7 +185,7 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
                 }
             })
 
-            // If labels already exist (from user input), append to them; otherwise create new array
+            //Add for labels the app label
             if (issueData.labels && Array.isArray(issueData.labels)) {
                 issueData.labels = [...issueData.labels, 'created-from-identityhub']
             } else {
@@ -195,7 +194,6 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
 
             console.log('Creating issue with data:', issueData)
 
-            // Create the issue
             const createdIssue = await jiraService.createIssue(issueData)
 
             showSuccessMsg(`Ticket ${createdIssue.key} created successfully! Redirecting...`)
@@ -208,9 +206,8 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
                 priority: priorities?.[0]?.id || ''
             })
 
-            // Wait for Jira to index the ticket before redirecting
+            // Redirect immediately - Recent Tickets page will poll for the new ticket
             if (onSuccess) {
-                await new Promise(resolve => setTimeout(resolve, 3000))
                 onSuccess(createdIssue)
             }
 
