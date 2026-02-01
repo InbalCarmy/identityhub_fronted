@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { showErrorMsg, showSuccessMsg } from '../services/event-bus.service'
-import { httpService } from '../services/http.service'
-import '../assets/style/pages/ApiKeysPage.css'
+import { apiKeyService } from '../services/api-key.service'
 
 export function ApiKeysPage() {
     const [apiKeys, setApiKeys] = useState([])
@@ -17,7 +16,7 @@ export function ApiKeysPage() {
     async function loadApiKeys() {
         try {
             setIsLoading(true)
-            const data = await httpService.get('apikeys')
+            const data = await apiKeyService.loadApiKeys()
             setApiKeys(data.apiKeys || [])
         } catch (err) {
             console.error('Failed to load API keys:', err)
@@ -37,7 +36,7 @@ export function ApiKeysPage() {
 
         try {
             setIsGenerating(true)
-            const data = await httpService.post('apikeys', { name: newKeyName.trim() })
+            const data = await apiKeyService.generateApiKey(newKeyName.trim())
             setGeneratedKey(data)
             setNewKeyName('')
             showSuccessMsg('API key generated successfully')
@@ -56,7 +55,7 @@ export function ApiKeysPage() {
         }
 
         try {
-            await httpService.delete(`apikeys/${keyId}`)
+            await apiKeyService.deleteApiKey(keyId)
             showSuccessMsg('API key deleted successfully')
             loadApiKeys()
         } catch (err) {

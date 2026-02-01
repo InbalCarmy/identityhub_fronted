@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { jiraService } from '../services/jira.service'
 import { showErrorMsg } from '../services/event-bus.service'
 import { TicketForm } from '../cmps/TicketForm'
-import '../assets/style/pages/CreateTicketPage.css'
 
 export function CreateTickedPage() {
     const navigate = useNavigate()

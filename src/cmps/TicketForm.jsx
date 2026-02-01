@@ -113,7 +113,6 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
         for (const field of additionalFields) {
             if (field.required && field.isSupported) {
                 const value = formData[field.key]
-                // Check if field is empty (handle arrays separately)
                 if (field.schema?.type === 'array') {
                     if (!Array.isArray(value) || value.length === 0) {
                         showErrorMsg(`${field.name} is required`)

@@ -8,6 +8,10 @@
 @import './pages/LoginPage.css';
 @import './pages/SignupPage.css';
 @import './pages/JiraConnectionPage.css';
+@import './pages/ApiKeysPage.css';
+@import './pages/CreateTicketPage.css';
+@import './pages/RecentTickets.css';
+
 
 /* Setup */
 @import './setup/var.css';

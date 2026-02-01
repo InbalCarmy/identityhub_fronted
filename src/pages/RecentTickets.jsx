@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { jiraService } from '../services/jira.service'
 import { showErrorMsg } from '../services/event-bus.service'
-import '../assets/style/pages/RecentTickets.css'
 
 export function RecentTickets() {
     const navigate = useNavigate()
