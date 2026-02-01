@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
     plugins: [react()],
     build: {
-        outDir: '../ai_crypto_advisor_backend/public',
+        outDir: '../IdentityHub_backend/public',
         emptyOutDir: true
     }
 })
