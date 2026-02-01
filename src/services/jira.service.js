@@ -45,6 +45,10 @@ async function createIssue(issueData) {
 //     return await httpService.get(`jira/projects/${projectKey}/issues`, { maxResults })
 // }
 
-async function getIdentityHubTickets(maxResults = 10) {
-    return await httpService.get('jira/identityhub-tickets', { maxResults })
+async function getIdentityHubTickets(maxResults = 10, projectKey = null) {
+    const params = { maxResults }
+    if (projectKey) {
+        params.projectKey = projectKey
+    }
+    return await httpService.get('jira/identityhub-tickets', params)
 }

@@ -175,7 +175,11 @@ export function CreateTickedPage() {
                             selectedProject={selectedProject}
                             selectedIssueType={selectedIssueType}
                             onCancel={() => navigate('/jira')}
-                            onSuccess={() => {navigate('/jira/recent-tickets') }}
+                            onSuccess={() => {
+                                navigate('/jira/recent-tickets', {
+                                    state: { projectKey: selectedProject.key }
+                                })
+                            }}
                         />
                     )}
                 </div>

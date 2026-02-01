@@ -1,20 +1,30 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { jiraService } from '../services/jira.service'
 import { showErrorMsg } from '../services/event-bus.service'
 
 export function RecentTickets() {
     const navigate = useNavigate()
+    const location = useLocation()
     const [tickets, setTickets] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [isConnected, setIsConnected] = useState(false)
     const [jiraSiteUrl, setJiraSiteUrl] = useState('')
+    const [projects, setProjects] = useState([])
+    const [selectedProjectKey, setSelectedProjectKey] = useState('')
+    const [isLoadingProjects, setIsLoadingProjects] = useState(false)
 
     useEffect(() => {
-        loadTickets()
+        loadInitialData()
     }, [])
 
-    async function loadTickets() {
+    useEffect(() => {
+        if (isConnected) {
+            loadTickets()
+        }
+    }, [selectedProjectKey, isConnected])
+
+    async function loadInitialData() {
         try {
             setIsLoading(true)
 
@@ -23,6 +33,7 @@ export function RecentTickets() {
             setIsConnected(status.isConnected)
 
             if (!status.isConnected) {
+                setIsLoading(false)
                 return
             }
 
@@ -31,8 +42,35 @@ export function RecentTickets() {
                 setJiraSiteUrl(status.siteUrl)
             }
 
-            // Fetch tickets created from IdentityHub
-            const ticketsData = await jiraService.getIdentityHubTickets(10)
+            // Load projects
+            setIsLoadingProjects(true)
+            const projectsData = await jiraService.getProjects()
+            setProjects(projectsData)
+            setIsLoadingProjects(false)
+
+            // Check if projectKey was passed from Create Ticket page
+            const projectKeyFromState = location.state?.projectKey
+            if (projectKeyFromState) {
+                setSelectedProjectKey(projectKeyFromState)
+            }
+
+        } catch (err) {
+            console.error('Failed to load initial data:', err)
+            showErrorMsg(err.message || 'Failed to load data')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    async function loadTickets() {
+        try {
+            setIsLoading(true)
+
+            // Fetch tickets created from IdentityHub, filtered by project if selected
+            const ticketsData = await jiraService.getIdentityHubTickets(
+                10,
+                selectedProjectKey || null
+            )
             setTickets(ticketsData)
 
         } catch (err) {
@@ -85,7 +123,28 @@ export function RecentTickets() {
 
     return (
         <section className="recent-tickets-page">
-                <h2>Recent Tickets from IdentityHub</h2>
+            <h2>Recent Tickets from IdentityHub</h2>
+
+            {/* Project Filter */}
+            {projects.length > 0 && (
+                <div className="filter-section">
+                    <label htmlFor="projectFilter">Filter by Project:</label>
+                    <select
+                        id="projectFilter"
+                        value={selectedProjectKey}
+                        onChange={(e) => setSelectedProjectKey(e.target.value)}
+                        disabled={isLoadingProjects}
+                    >
+                        <option value="">All Projects</option>
+                        {projects.map(project => (
+                            <option key={project.id} value={project.key}>
+                                {project.name} ({project.key})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
             {tickets.length === 0 ? (
                 <div className="no-tickets">
                     <p>No tickets created from IdentityHub yet.</p>
