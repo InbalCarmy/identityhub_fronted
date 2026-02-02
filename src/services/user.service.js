@@ -70,8 +70,6 @@ function _saveLocalUser(user) {
         _id: user._id, 
         name: user.name,
         email: user.email,
-        isOnboarded: user.isOnboarded,
-        preferences: user.preferences
     }
     sessionStorage.setItem(STORAGE_KEY_LOGGEDIN_USER, JSON.stringify(userToSave))
     return userToSave

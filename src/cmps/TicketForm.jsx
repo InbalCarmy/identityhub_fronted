@@ -18,7 +18,7 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
         const fieldsToIgnore = ['summary', 'description', 'priority', 'project', 'issuetype']
         const fields = []
 
-        // Helper function to determine if field type is supported
+        // determine if field type is supported
         const isSupportedField = (fieldConfig) => {
             const schema = fieldConfig.schema
 
@@ -206,7 +206,7 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
                 priority: priorities?.[0]?.id || ''
             })
 
-            // Redirect immediately - Recent Tickets page will poll for the new ticket
+            // Redirect to Recent Tickets page
             if (onSuccess) {
                 onSuccess(createdIssue)
             }

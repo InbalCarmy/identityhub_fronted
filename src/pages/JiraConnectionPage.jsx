@@ -49,10 +49,10 @@ export function JiraConnectionPage() {
 
     async function handleConnect() {
         try {
-            // Get authorization URL from backend
+            // Get authorization url
             const { authUrl } = await jiraService.initiateOAuth()
 
-            // Open Jira authorization in a popup window
+            // Open authorization in a popup window
             const width = 600
             const height = 700
             const left = window.screen.width / 2 - width / 2
@@ -64,11 +64,10 @@ export function JiraConnectionPage() {
                 `width=${width},height=${height},left=${left},top=${top},popup=1,resizable=1`
             )
 
-            // Listen for the OAuth callback
+            // Listen if the OAuth window is closed
             const checkPopupClosed = setInterval(() => {
                 if (popup.closed) {
                     clearInterval(checkPopupClosed)
-                    // Refresh connection status after popup closes
                     checkConnectionStatus()
                 }
             }, 500)
