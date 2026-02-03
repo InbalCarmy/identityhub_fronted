@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { jiraService } from '../services/jira.service'
 import { showErrorMsg } from '../services/event-bus.service'
@@ -14,6 +14,7 @@ export function RecentTickets() {
     const [selectedProjectKey, setSelectedProjectKey] = useState('')
     const [isLoadingProjects, setIsLoadingProjects] = useState(false)
     const [isPolling, setIsPolling] = useState(false)
+    const hasHandledNavigation = useRef(false) // for polling to happent only on initial mount
 
     useEffect(() => {
         loadInitialData()
@@ -25,12 +26,13 @@ export function RecentTickets() {
         }
     }, [selectedProjectKey, isConnected])
 
-    // Poll for new ticket if we just created one
+    // Poll for new ticket if we just created one (only once on initial mount)
     useEffect(() => {
         const newTicketKey = location.state?.newTicketKey
         const projectKey = location.state?.projectKey
 
-        if (newTicketKey && isConnected && !isLoading) {
+        if (newTicketKey && isConnected && !isLoading && !hasHandledNavigation.current) {
+            hasHandledNavigation.current = true
             pollForNewTicket(newTicketKey, projectKey)
         }
     }, [location.state, isConnected, isLoading])
@@ -64,7 +66,6 @@ export function RecentTickets() {
             if (projectKeyFromState) {
                 setSelectedProjectKey(projectKeyFromState)
             }
-
         } catch (err) {
             console.error('Failed to load initial data:', err)
             showErrorMsg(err.message || 'Failed to load data')
@@ -94,8 +95,8 @@ export function RecentTickets() {
 
     async function pollForNewTicket(ticketKey, projectKey) {
         setIsPolling(true)
-        const maxAttempts = 10 // Poll up to 10 times
-        const pollInterval = 1000 // Check every 1 second
+        const maxAttempts = 10 
+        const pollInterval = 1000 
         let attempts = 0
 
         console.log(`Polling for new ticket: ${ticketKey}`)
@@ -104,7 +105,6 @@ export function RecentTickets() {
             attempts++
 
             try {
-                // Fetch latest tickets
                 const ticketsData = await jiraService.getIdentityHubTickets(
                     10,
                     projectKey || null
