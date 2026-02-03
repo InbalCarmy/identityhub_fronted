@@ -127,10 +127,6 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
 
         try {
             setIsSubmitting(true)
-
-            console.log('Using issue type ID:', selectedIssueType.id)
-            console.log('Selected issue type:', selectedIssueType)
-
             // Prepare issue data in Jira API format
             const issueData = {
                 project: {
@@ -191,9 +187,6 @@ export function TicketForm({ selectedProject, selectedIssueType, onCancel, onSuc
             } else {
                 issueData.labels = ['created-from-identityhub']
             }
-
-            console.log('Creating issue with data:', issueData)
-
             const createdIssue = await jiraService.createIssue(issueData)
 
             showSuccessMsg(`Ticket ${createdIssue.key} created successfully! Redirecting...`)

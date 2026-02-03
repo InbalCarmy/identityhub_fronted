@@ -59,9 +59,6 @@ export function CreateTickedPage() {
         try {
             setIsLoadingMetadata(true)
             const metadata = await jiraService.getProjectMetadata(projectKey)
-
-            console.log('Raw metadata:', metadata)
-
             // Parse the metadata structure from Jira API
             const projectData = metadata.projects?.[0]
 
@@ -73,8 +70,6 @@ export function CreateTickedPage() {
                 issueTypes: projectData.issuetypes || [],
                 priorities: projectData.issuetypes?.[0]?.fields?.priority?.allowedValues || []
             }
-
-            console.log('Parsed metadata:', parsedMetadata)
             setProjectMetadata(parsedMetadata)
 
             // Reset issue type when changing projects

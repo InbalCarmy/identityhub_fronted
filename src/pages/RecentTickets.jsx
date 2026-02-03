@@ -99,7 +99,6 @@ export function RecentTickets() {
         const pollInterval = 1000 
         let attempts = 0
 
-        console.log(`Polling for new ticket: ${ticketKey}`)
 
         const poll = async () => {
             attempts++
@@ -114,7 +113,6 @@ export function RecentTickets() {
                 const ticketFound = ticketsData.some(ticket => ticket.key === ticketKey)
 
                 if (ticketFound) {
-                    console.log(`✓ Ticket ${ticketKey} found after ${attempts} attempts`)
                     setTickets(ticketsData)
                     setIsPolling(false)
                     return // Stop polling
@@ -124,7 +122,6 @@ export function RecentTickets() {
                 if (attempts < maxAttempts) {
                     setTimeout(poll, pollInterval)
                 } else {
-                    console.log(`Polling timeout for ticket ${ticketKey}`)
                     setIsPolling(false)
                     // Load tickets one final time
                     loadTickets()

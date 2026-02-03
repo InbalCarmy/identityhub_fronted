@@ -69,10 +69,6 @@ export async function signup(credentials) {
 
 export async function logout() {
     try {
-        // Note: We DON'T clear cached data on logout
-        // This allows the user to see their cached content if they log back in on the same day
-        // The cache will automatically expire at midnight
-
         await userService.logout()
         store.dispatch({
             type: SET_USER,
