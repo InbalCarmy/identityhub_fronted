@@ -214,10 +214,16 @@ export function ApiKeysPage() {
                         <h4>Quick Start</h4>
                         <p>Basic examples to get started with the API</p>
                         <code className="code-example">
-                            curl -X POST http://localhost:3030/api/nhi-findings \<br/>
-                            &nbsp;&nbsp;-H "Authorization: Bearer ih_YOUR_KEY" \<br/>
+                            curl -X POST http://localhost:3030/api/nhi-findings/ \<br/>
                             &nbsp;&nbsp;-H "Content-Type: application/json" \<br/>
-                            &nbsp;&nbsp;-d '&#123;"projectKey":"PROJ","summary":"Finding"&#125;'
+                            &nbsp;&nbsp;-H "Authorization: Bearer $API_KEY" \<br/>
+                            &nbsp;&nbsp;-d '&#123;<br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"projectKey": "your-project-key",<br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"summary": "Demo security finding",<br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"description": "Testing API integration",<br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"issuetype": "Bug",<br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"priority": "High"<br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;'
                         </code>
                     </div>
                     <div className="doc-card">
